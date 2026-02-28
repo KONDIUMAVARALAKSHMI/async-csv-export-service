@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:15
+    container_name: async_pg_db
+    restart: always
+    environment:
+      POSTGRES_USER: exporter
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: exports_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./seeds:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U exporter -d exports_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: async_fastapi_app
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    mem_limit: 150m
+    volumes:
+      - ./exports:/app/exports
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=exporter
+      - DB_PASSWORD=secret
+      - DB_NAME=exports_db
+      - DATABASE_URL=postgresql+asyncpg://exporter:secret@db:5432/exports_db
+      - EXPORT_STORAGE_PATH=/app/exports
+
+volumes:
+  postgres_data:
