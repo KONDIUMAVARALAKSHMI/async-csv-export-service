@@ -28,7 +28,7 @@ A high-performance, containerized service for exporting millions of database rec
    ```bash
    docker-compose up --build -d
    ```
-   *Note: The first run will take ~30-60 seconds to seed 10 million records.*
+   _Note: The first run will take ~30-60 seconds to seed 10 million records._
 
 ## API Endpoints
 
@@ -41,3 +41,15 @@ A high-performance, containerized service for exporting millions of database rec
 ## Configuration
 
 Settings are managed via environment variables in `.env`. Key parameters include database credentials and the `EXPORT_STORAGE_PATH` for temporary files.
+
+## API Endpoints
+
+POST /export/users
+GET /export/status/{job_id}
+
+## Architecture
+
+- FastAPI
+- PostgreSQL
+- Redis
+- Async Background Jobs
