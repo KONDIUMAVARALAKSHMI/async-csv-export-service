@@ -21,6 +21,7 @@ async def lifespan(app: FastAPI):
     logger.info("Shutting down...")
 
 # -------------------- App Initialization --------------------
+# Main FastAPI application instance
 app = FastAPI(
     title="Large-Scale CSV Export Service",
     lifespan=lifespan
