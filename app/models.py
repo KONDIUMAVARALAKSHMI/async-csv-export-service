@@ -21,7 +21,7 @@ class Export(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     status = Column(String, nullable=False) # pending, processing, completed, failed, cancelled
     total_rows = Column(Integer, default=0)
-    processed_rows = Column(Integer, default=0)
+    processed_rows = Column(Integer, default=0) # rows we already did
     percentage = Column(Integer, default=0)
     error = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
