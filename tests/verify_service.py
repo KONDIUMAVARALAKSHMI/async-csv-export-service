@@ -1,8 +1,13 @@
 import requests
+# Standard library and third-party imports
 import time
+# Standard library and third-party imports
 import sys
+# Standard library and third-party imports
 import gzip
+# Standard library and third-party imports
 import io
+# Standard library and third-party imports
 
 BASE_URL = "http://localhost:8080"
 
