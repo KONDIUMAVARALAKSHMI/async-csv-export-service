@@ -14,7 +14,7 @@ from app.export_service import process_export, cancel_job
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-# -------------------- Initiate Export --------------------
+# Endpoint to start the export
 @router.post("/exports/csv", status_code=202)
 async def initiate_export(
     background_tasks: BackgroundTasks,
@@ -72,7 +72,7 @@ async def initiate_export(
     return {"exportId": export_id, "status": "pending"}
 
 
-# -------------------- Export Status --------------------
+# check progress
 @router.get("/exports/{export_id}/status")
 async def get_export_status(export_id: str, db: AsyncSession = Depends(get_db)):
     logger.info(f"Status checked for export: {export_id}")
@@ -100,7 +100,7 @@ async def get_export_status(export_id: str, db: AsyncSession = Depends(get_db)):
     }
 
 
-# -------------------- Download Export --------------------
+# download the actual file
 @router.get("/exports/{export_id}/download")
 async def download_export(export_id: str, request: Request, db: AsyncSession = Depends(get_db)):
     logger.info(f"Download requested for export: {export_id}")
@@ -154,7 +154,7 @@ async def download_export(export_id: str, request: Request, db: AsyncSession = D
     )
 
 
-# -------------------- Cancel Export --------------------
+# stop the export job
 @router.delete("/exports/{export_id}", status_code=204)
 async def cancel_export(export_id: str, db: AsyncSession = Depends(get_db)):
     logger.info(f"Cancel requested for export: {export_id}")
