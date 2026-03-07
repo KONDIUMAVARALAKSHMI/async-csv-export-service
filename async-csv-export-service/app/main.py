@@ -1,23 +1,35 @@
-export_id = str(uuid4())
+from fastapi import FastAPI
+from contextlib import asynccontextmanager
+import logging
 
-logger.info(f"New export requested: {export_id}")
+from app.database import engine, Base
+from app.routes import router
 
-# Validation
-if delimiter and len(delimiter) != 1:
-    raise HTTPException(
-        status_code=400,
-        detail="Delimiter must be a single character"
-    )
+# -------------------- Logging Configuration --------------------
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-if quoteChar and len(quoteChar) != 1:
-    raise HTTPException(
-        status_code=400,
-        detail="Quote character must be a single character"
-    )
+# -------------------- Lifespan Context Manager --------------------
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Database Initialization
+    async with engine.begin() as conn:
+        logger.info("Initializing database...")
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    # Shutdown: (Optional cleanup)
+    logger.info("Shutting down...")
 
-new_export = Export(
-    id=export_id,
-    status="pending",
-    filters=f"country_code={country_code},tier={subscription_tier},min_ltv={min_ltv}",
-    columns=columns
+# -------------------- App Initialization --------------------
+app = FastAPI(
+    title="Large-Scale CSV Export Service",
+    lifespan=lifespan
 )
+
+# Health Check
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
+# Include Routes
+app.include_router(router)

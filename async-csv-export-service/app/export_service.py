@@ -1,7 +1,8 @@
 import csv
 import os
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
+from uuid import UUID
 from sqlalchemy import select, and_, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import User, Export
@@ -14,7 +15,16 @@ active_tasks = {}
 async def update_status(export_id, processed_rows=None, percentage=None, status=None, error=None, file_path=None):
     """Helper to update export status in a separate session to avoid transaction issues."""
     async with AsyncSessionLocal() as db:
-        export = await db.get(Export, export_id)
+        # Ensure export_id is a UUID object for db.get()
+        if isinstance(export_id, str):
+            try:
+                export_id_obj = UUID(export_id)
+            except ValueError:
+                return
+        else:
+            export_id_obj = export_id
+
+        export = await db.get(Export, export_id_obj)
         if not export:
             return
         
@@ -30,7 +40,7 @@ async def update_status(export_id, processed_rows=None, percentage=None, status=
             export.file_path = file_path
         
         if status == "completed":
-            export.completed_at = datetime.utcnow()
+            export.completed_at = datetime.now(timezone.utc)
             export.percentage = 100
             
         await db.commit()
@@ -80,17 +90,21 @@ async def process_export(
             
             # Update total rows in DB
             async with AsyncSessionLocal() as status_db:
-                export = await status_db.get(Export, export_id)
-                export.total_rows = total_rows
-                await status_db.commit()
+                # Ensure export_id is a UUID object for db.get()
+                export_id_obj = UUID(export_id) if isinstance(export_id, str) else export_id
+                export = await status_db.get(Export, export_id_obj)
+                if export:
+                    export.total_rows = total_rows
+                    await status_db.commit()
 
             if total_rows == 0:
                 await update_status(export_id, status="completed", percentage=100)
                 return
 
             # 4. Stream data and write to CSV
-            os.makedirs("exports", exist_ok=True)
-            file_path = f"exports/export_{export_id}.csv"
+            export_dir = os.getenv("EXPORT_STORAGE_PATH", "exports")
+            os.makedirs(export_dir, exist_ok=True)
+            file_path = os.path.join(export_dir, f"export_{export_id}.csv")
             
             processed_rows = 0
             

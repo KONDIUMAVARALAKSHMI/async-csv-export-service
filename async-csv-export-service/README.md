@@ -30,13 +30,30 @@ A high-performance, containerized service for exporting millions of database rec
    ```
    _Note: The first run will take ~30-60 seconds to seed 10 million records._
 
-## API Endpoints
+## Local Development (VS Code)
 
-- `POST /exports/csv`: Initiate a new export.
-- `GET /exports/{id}/status`: Check progress.
-- `GET /exports/{id}/download`: Download the file.
-- `DELETE /exports/{id}`: Cancel a job.
-- `GET /health`: Health status.
+To run the project locally without Docker (e.g., for debugging in VS Code):
+
+1. **Prerequisites**: Ensure you have Python 3.11+ and PostgreSQL installed locally.
+2. **Virtual Environment**:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
+3. **Database**: If you are using the database from the Docker container, ensure it's running (`docker-compose up db -d`).
+4. **Environment Setup**:
+   - Rename `.env.example` to `.env`.
+   - Set `DB_HOST=localhost` (if the DB is running locally or exposed via Docker port 5432).
+5. **Run the App**:
+   ```bash
+   uvicorn app.main:app --reload --port 8080
+   ```
+6. **VS Code Debugging**:
+   - Create a `.vscode/launch.json` file.
+   - Use the "Python: FastAPI" template or point to `uvicorn` with `app.main:app`.
+
+## API Endpoints
 
 ## Configuration
 

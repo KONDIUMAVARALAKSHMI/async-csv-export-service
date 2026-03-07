@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, DateTime, Integer, Numeric
 from sqlalchemy.dialects.postgresql import UUID
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 from app.database import Base
 
@@ -10,7 +10,7 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, nullable=False)
-    signup_date = Column(DateTime(timezone=True), default=datetime.utcnow)
+    signup_date = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     country_code = Column(String(2), nullable=False)
     subscription_tier = Column(String(50), default='free')
     lifetime_value = Column(Numeric(10, 2), default=0.00)
@@ -24,7 +24,7 @@ class Export(Base):
     processed_rows = Column(Integer, default=0)
     percentage = Column(Integer, default=0)
     error = Column(String, nullable=True)
-    created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     completed_at = Column(DateTime(timezone=True), nullable=True)
     file_path = Column(String, nullable=True)
     
