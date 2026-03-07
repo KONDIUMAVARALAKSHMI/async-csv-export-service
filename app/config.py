@@ -10,7 +10,7 @@ def is_running_in_docker():
     return os.path.exists('/.dockerenv') or os.environ.get('DOCKER_CONTAINER') == 'true'
 
 class Settings:
-    # Auto-detect defaults based on environment
+    # use db or localhost depending on where it's running
     _default_host = "db" if is_running_in_docker() else "localhost"
     
     DB_USER = os.getenv("DB_USER", "exporter")
