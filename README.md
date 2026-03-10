@@ -39,7 +39,7 @@ If you want to debug or run it without Docker:
 
 ## API
 
-- `POST /exports/users` - Start a new export.
+- `POST /exports/csv` - Start a new export.
 - `GET /exports/{job_id}/status` - Check how much is done.
 - `GET /exports/{job_id}/download` - Download the file.
 - `DELETE /exports/{job_id}` - Stop the export.
